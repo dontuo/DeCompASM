@@ -16,7 +16,7 @@ buildrun.sh
 Just give a program path to file with code. The program will generate DeComp.mem file. This file you can copy to DeComp folder.
 
 ```bash
-./DeComp commands.txt
+./DeCompAsm commands.txt
 ```
 
 # Features
