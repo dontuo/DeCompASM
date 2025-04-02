@@ -1,4 +1,5 @@
 #include "assembler.hpp"
+#include <string>
 
 std::unordered_map<std::string, uint16_t> opcodeMap = {
     {"LOAD",  0b0000000000000000},
@@ -42,9 +43,16 @@ std::vector<std::string> Tokenize(std::string line) {
     std::vector<std::string> result;
     std::stringstream ss(line);
     std::string token;
+
     while(ss >> token) {
+        if(token[0] == ';' or token.find(';') != std::string::npos)
+        {
+            std::cout << line << std::endl;
+            goto skip;
+        }
         result.push_back(token);
     }
+skip:
     return result;
 }
 
