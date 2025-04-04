@@ -34,8 +34,11 @@ Comments
 ```
 ; this is commnent
 LOAD 10 ; this is comment too
+LOAD 10; !!! this is comment, but 10 will be ignored (I'll fix it later)
 ```
 
 # Future features
 
-- [X] Add support of comments
+- [X] Add support of comments (kinda)
+- [ ] Add support of variables
+- [ ] Add support of lables
