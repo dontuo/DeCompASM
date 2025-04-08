@@ -1,5 +1,20 @@
-LOAD 10
+dvar number = 25
+dvar count = 0
+dvar ONE = 1
+dvar counter = 15
+
+LOAD number
 RCL
-STORE 10
-JMP 0
-STORE 10 25
+STORE number
+JC 7 
+
+LOAD count
+ADD ONE
+STORE count
+
+LOAD counter
+SUB ONE
+STORE counter
+
+JNC 0
+HALT
