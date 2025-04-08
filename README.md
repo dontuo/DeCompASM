@@ -25,7 +25,9 @@ In addition I added some features (only 1 rn):
 
 - **dvar name = number**
 
-Creates variable **name** with decimal value **number** 
+Creates variable **name** with decimal value **number**
+
+All variables are visible everywhere. if you make variable on line 10, statement on line 1 knows about that variable (there may be problems because I haven't fully tested the code)
 
 ---
 
