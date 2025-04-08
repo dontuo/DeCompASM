@@ -1,0 +1,5 @@
+dvar KOK = 23
+dvar LEL = 10
+STORE KOK 
+ADD KOK
+SUB LEL
