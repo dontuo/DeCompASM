@@ -21,11 +21,11 @@ Just give a program path to file with code. The program will generate DeComp.mem
 # Features
 
 converts asm to machine code.
-In addition I added some commands (only 1 right now):
+In addition I added some features (only 1 rn):
 
-- **STORE index value**
+- **dvar name = number**
 
-This command stores the given **value** into the memory cell at the specified **index**.
+Creates variable **name** with decimal value **number** 
 
 ---
 
