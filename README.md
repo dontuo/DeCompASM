@@ -37,8 +37,16 @@ LOAD 10 ; this is comment too
 LOAD 10; !!! this is comment, but 10 will be ignored (I'll fix it later)
 ```
 
+Examples
+```
+dvar NUMBER1 = 10 ; number1
+dvar NUMBER2 = 23 ; number2
+LOAD NUMBER2      ; loads number2 in memory
+SUB NUMBER1       ; sub number2 from number1
+```
+
 # Future features
 
 - [X] Add support of comments (kinda)
-- [ ] Add support of variables
+- [X] Add support of variables
 - [ ] Add support of lables
