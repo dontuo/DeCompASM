@@ -87,6 +87,8 @@ int GetInstructionCount(std::string filename)
     while (std::getline(file, line)) 
     {
         std::vector<std::string> tokens = Tokenize(line);
+        if(tokens.empty())
+            continue;
         std::string instruction = tokens[0];
 
         if (opcodeMap.find(instruction) != opcodeMap.end() && additionalMap.find(instruction) == additionalMap.end()) 
@@ -147,7 +149,7 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
     std::unordered_map<std::string, Variable> variables = GetVariablesMap(filename, instructionCount);
     
     std::vector<std::string> invalidTokens;
-    std::vector<uint16_t> data(MEM_BUFF / 2);
+    std::vector<uint16_t> data(MEM_BUFF);
     
     std::ifstream file(filename);
     std::string line;
@@ -157,8 +159,10 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
         std::vector<std::string> tokens = Tokenize(line);
 
         if (tokens.empty()) 
+        {
+            i--;
             continue;
-
+        }
         std::string instruction = tokens[0];
 
         if (opcodeMap.find(instruction) == opcodeMap.end() && additionalMap.find(instruction) == additionalMap.end()) 
