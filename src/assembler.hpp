@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -15,7 +16,14 @@ enum class ArgStatus {
     INVALID_ARGS = 2
 };
 
+struct Variable
+{
+    uint16_t address;
+    uint16_t value;
+};
+
 extern std::unordered_map<std::string, uint16_t> opcodeMap;
+extern std::unordered_map<std::string, uint16_t> additionalMap;
 
 std::vector<uint8_t> Cnv16to8ROL(std::vector<uint16_t> array);
 std::vector<std::string> Tokenize(std::string line);
