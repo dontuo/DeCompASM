@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <vector>
@@ -30,11 +31,13 @@ TEST(Assembler, Tokenize) {
     ASSERT_EQ(outputValues, expectedValues);
 }
 
-TEST(Assembler, AssembleFromFile)
+TEST(Assembler, AssembleFromFile_varialbeTest)
 {
-    std::string fileName = "../../tests/test.txt";
+    std::string fileName = "../../tests/variable_test.txt";
     std::ifstream file(fileName);
-    ASSERT_TRUE(file.is_open()) << "File didn't opened";
+    ASSERT_TRUE(file.is_open()); 
+
+    std::cout << "File didn't opened";
     
     std::vector<uint8_t> data = 
     {
@@ -42,13 +45,14 @@ TEST(Assembler, AssembleFromFile)
         0b00010111, 0b00000000, 0b00001010
     };
     
-    std::vector<uint8_t> expectedValue(MEM_BUFF, 0);
+    std::vector<uint8_t> expectedValue(MEM_BUFF * 2, 0);
     std::copy(data.begin(), data.end(), expectedValue.begin());
     
     std::vector<uint8_t> outputValue = AssembleFromFile(fileName);
 
     EXPECT_EQ(expectedValue, outputValue);
 }
+
 
 int main(int argc, char **argv)
 {
