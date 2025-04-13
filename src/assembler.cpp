@@ -59,9 +59,16 @@ std::vector<std::string> Tokenize(std::string line)
 
     while(ss >> token) 
     {
-        if(token[0] == ';' or token.find(';') != std::string::npos)
+        auto sign = token.find(';');
+
+        if(token[0] == ';')
         {
             std::cout << line << std::endl;
+            goto skip;
+        }
+        if(sign != std::string::npos)
+        {
+            result.push_back(token.substr(0, sign));
             goto skip;
         }
         result.push_back(token);

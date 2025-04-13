@@ -11,7 +11,9 @@ TEST(Assembler, Tokenize) {
     {
         "ADD 10 ;asdqwer",
         "MOVE 12 2134r5",
-        ";213432423 32452 35123"
+        ";213432423 32452 35123",
+        "MOVE 1; 2134r5",
+        "MOVE ;; 2134r5",
     };
 
     std::vector<std::vector<std::string>> expectedValues = 
@@ -19,6 +21,7 @@ TEST(Assembler, Tokenize) {
         {"ADD", "10"},
         {"MOVE", "12", "2134r5"},
         {},
+        {"MOVE", "1"},
     };
 
     std::vector<std::vector<std::string>> outputValues;
@@ -31,7 +34,7 @@ TEST(Assembler, Tokenize) {
     ASSERT_EQ(outputValues, expectedValues);
 }
 
-TEST(Assembler, AssembleFromFile_varialbeTest)
+TEST(AssemblerFromFile, Variable_Test_no_erors)
 {
     std::string fileName = "../../tests/variable_test.txt";
     std::ifstream file(fileName);
@@ -56,7 +59,6 @@ TEST(Assembler, AssembleFromFile_varialbeTest)
 
 int main(int argc, char **argv)
 {
-    //SpdlogConfig::init<SpdlogConfig::LogLevel::Off>();
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
