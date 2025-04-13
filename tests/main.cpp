@@ -22,6 +22,7 @@ TEST(Assembler, Tokenize) {
         {"MOVE", "12", "2134r5"},
         {},
         {"MOVE", "1"},
+        {"MOVE"}
     };
 
     std::vector<std::vector<std::string>> outputValues;
