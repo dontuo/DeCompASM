@@ -1,8 +1,10 @@
 #include "assembler.hpp"
 #include <cctype>
+#include <csignal>
 #include <cstdint>
 #include <map>
 #include <string>
+#include <sys/types.h>
 #include <vector>
 
 // instructions of DeComp
@@ -63,17 +65,16 @@ std::vector<std::string> Tokenize(std::string line)
 
         if(token[0] == ';')
         {
-            std::cout << line << std::endl;
-            goto skip;
+            break;
         }
         if(sign != std::string::npos)
         {
             result.push_back(token.substr(0, sign));
-            goto skip;
+            break;
         }
         result.push_back(token);
     }
-skip:
+
     return result;
 }
 
@@ -96,6 +97,7 @@ int GetInstructionCount(std::string filename)
         std::vector<std::string> tokens = Tokenize(line);
         if(tokens.empty())
             continue;
+
         std::string instruction = tokens[0];
 
         if (opcodeMap.find(instruction) != opcodeMap.end() && additionalMap.find(instruction) == additionalMap.end()) 
@@ -110,30 +112,27 @@ int GetInstructionCount(std::string filename)
 std::unordered_map<std::string, Variable> GetVariablesMap(std::string filename, int instructionCount)
 {
     std::unordered_map<std::string, Variable> variables;
-
     std::ifstream file(filename);
-
     std::string line;
+
     //adding variables name, values and addresses 
-    for(int i = 0; std::getline(file, line); i++) 
+    int instructionIndex = 0;
+    while (std::getline(file, line))
     {
         std::vector<std::string> tokens = Tokenize(line);
 
         if(tokens.empty())
         {
-            i--;
             continue;
         }
         
         if(tokens.size() != 4)
         {
-            i--;
             continue;
         }
 
         if(tokens[0] != "dvar")
         {
-            i--;
             continue;
         }
 
@@ -142,20 +141,114 @@ std::unordered_map<std::string, Variable> GetVariablesMap(std::string filename, 
         std::string value = tokens[3];
          
         if(variableName != "dvar" && equal_sign != "=")
+        {
+            instructionIndex++;
             continue;
-
-        variables.insert({variableName, Variable{(uint16_t)(instructionCount + i), (uint16_t)std::stoi(value.c_str())}});
+        }
+        variables.insert({variableName, Variable{(uint16_t)(instructionCount + instructionIndex), (uint16_t)std::stoi(value.c_str())}});
+        instructionIndex++;
     }
 
     return variables;
 }
 
+std::unordered_map<std::string, uint16_t> GetLablesMap(std::string filename)
+{
+     std::unordered_map<std::string, uint16_t> lables;
+
+    std::ifstream file(filename);
+
+    std::string line;
+    //adding variables name, values and addresses 
+    //for(int i = 0; std::getline(file, line); i++) 
+    int instructionIndex = 0;
+
+    while (std::getline(file, line))
+    {
+        std::vector<std::string> tokens = Tokenize(line);
+
+        if(tokens.empty())
+        {
+            continue;
+        }
+
+        if(additionalMap.find(tokens[0]) != additionalMap.end() && tokens[0] != "Lab")
+        {
+            continue;
+        }
+        if(opcodeMap.find(tokens[0]) != additionalMap.end())
+        {
+            instructionIndex++;
+            continue;
+        }
+
+        if(tokens.size() != 2)
+        {
+            instructionIndex++;
+            continue;
+        }
+
+        auto sign = tokens[1].find(':');
+        std::string lableName = tokens[1].substr(0, sign);
+         
+        lables.insert({lableName, uint16_t(instructionIndex)});
+    }
+
+    return lables;
+}
+
+std::vector<std::string> ParseAsmFileForErrors(std::string filename)
+{
+    std::ifstream file(filename);
+    std::string line;
+
+    std::vector<std::string> invalidTokens;
+
+    for(int lineNumber = 0; std::getline(file, line); lineNumber++)
+    {
+        std::vector<std::string> tokens = Tokenize(line);
+
+        if(tokens.empty())
+            continue;
+
+        std::string instruction = tokens[0];
+
+        // checks is instruction in opcode map or additional map
+        if (opcodeMap.find(instruction) == opcodeMap.end() && additionalMap.find(instruction) == additionalMap.end()) 
+        {
+            invalidTokens.push_back("invalid token. Instruction: " + instruction + " line: " + std::to_string(lineNumber + 1));
+        }
+    }
+
+    return invalidTokens;
+}
+
 std::vector<uint8_t> AssembleFromFile(std::string filename) 
 {
-    int instructionCount = GetInstructionCount(filename);
-    std::unordered_map<std::string, Variable> variables = GetVariablesMap(filename, instructionCount);
-    
     std::vector<std::string> invalidTokens;
+
+    int instructionCount = GetInstructionCount(filename);
+    std::unordered_map<std::string, Variable> variables;
+    std::unordered_map<std::string, uint16_t> labels;
+
+    variables = GetVariablesMap(filename, instructionCount);
+        labels = GetLablesMap(filename);
+    /*try
+    {
+    }
+    catch (std::vector<std::string> errors)
+    {
+        invalidTokens.emplace_back(errors); 
+    }
+
+    try
+    {
+    }
+    catch(std::vector<std::string> errors)
+    {
+        invalidTokens.emplace_back(errors); 
+    }*/
+
     std::vector<uint16_t> data(MEM_BUFF);
     
     std::ifstream file(filename);
@@ -170,8 +263,9 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
             i--;
             continue;
         }
-        std::string instruction = tokens[0];
 
+        std::string instruction = tokens[0];
+    
         if (opcodeMap.find(instruction) == opcodeMap.end() && additionalMap.find(instruction) == additionalMap.end()) 
         {
             invalidTokens.push_back("invalid token. Instruction: " + instruction + " line: " + std::to_string(i + 1));
@@ -184,12 +278,18 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
         }
         else if (tokens.size() == 2) 
         {
+            //this if for variables
             if(variables.find(tokens[1]) != variables.end())
                 data[i] = opcodeMap[instruction] | (variables[tokens[1]].address);
-            else
+            //this if for labs
+            else if (labels.find(tokens[1]) != labels.end())
+                data[i] = opcodeMap[instruction] | (labels[tokens[1]]);
+            else if(instruction != "Lab")
                 data[i] = opcodeMap[instruction] | StrToUint16(tokens[1]);
+            else
+                i--; 
         }
-        else if (tokens.size() == 4 && tokens[0] == "dvar") 
+        else if (tokens.size() == 4 && instruction == "dvar") 
         {
             std::string variableName = tokens[1];
             int index = variables[variableName].address;

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <string>
 #include <vector>
 #include "assembler.hpp"
 
@@ -41,7 +42,6 @@ TEST(AssemblerFromFile, Variable_Test_no_erors)
     std::ifstream file(fileName);
     ASSERT_TRUE(file.is_open()); 
 
-    std::cout << "File didn't opened";
     
     std::vector<uint8_t> data = 
     {
@@ -55,6 +55,30 @@ TEST(AssemblerFromFile, Variable_Test_no_erors)
     std::vector<uint8_t> outputValue = AssembleFromFile(fileName);
 
     EXPECT_EQ(expectedValue, outputValue);
+}
+
+TEST(AssemblerFromFile, Variable_Test_With_Syntax_Errors)
+{
+    std::string fileName = "../../tests/error_test.txt";
+    std::ifstream file(fileName);
+    ASSERT_TRUE(file.is_open()); 
+
+    std::vector<std::string> expectedErrors
+    {
+        "invalid token. Instruction: dbar line: 1",
+        "invalid token. Instruction: dbar line: 2",
+        "invalid token. Instruction: LODA line: 3",
+        "invalid token. Instruction: BUS line: 4",
+    }; 
+
+    try 
+    {
+        AssembleFromFile(fileName);
+    } 
+    catch (std::vector<std::string> errors) 
+    {
+        EXPECT_EQ(errors, expectedErrors);      
+    }
 }
 
 

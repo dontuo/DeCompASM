@@ -1,0 +1,4 @@
+dbar NAME = 10
+dbar NAME  10
+LODA NAME
+BUS NAME
