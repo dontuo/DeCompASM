@@ -51,4 +51,4 @@ SUB NUMBER1       ; sub number2 from number1
 
 - [X] Add support of comments (kinda)
 - [X] Add support of variables
-- [ ] Add support of lables
+- [X] Add support of lables
