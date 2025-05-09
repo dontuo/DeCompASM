@@ -1,5 +1,4 @@
 #include "assembler.hpp"
-
 // instructions of DeComp
 std::unordered_map<std::string, uint16_t> opcodeMap = {
     {"LOAD", 0b0000000000000000}, 
@@ -75,7 +74,8 @@ std::vector<Token> Tokenize(std::string line)
     {
         std::string instruction = match.str(1);
         result.push_back(Token{TokenType::INSTRUCTION, instruction});
-        if (match.size() == 3)
+
+        if (match.size() == 3 && !match.str(2).empty())
         {
             std::string value = match.str(2);
             result.push_back(Token{TokenType::VALUE, value});
@@ -206,11 +206,59 @@ std::unordered_map<std::string, uint16_t> GetLablesMap(std::string filename)
 
     return lables;
 }
+std::vector<std::string>CheckFileForNameConflicts(std::string filename)
+{
+    std::vector<std::string> result;
+    std::unordered_map<std::string, Variable> variables;
+    std::unordered_map<std::string, uint16_t> labels;
+    
+    variables = GetVariablesMap(filename, 0);
+    labels = GetLablesMap(filename);
+
+    for(auto &a: variables)
+    {
+        if(labels.contains(a.first))
+        {
+            result.push_back("-------------------------------------------\nName conflict – '" + a.first + "' is used as both a label and a variable." + "\n-------------------------------------------");
+        }
+    }
+
+    std::ifstream file(filename);
+    std::string line;
+
+    for (int i = 0; (std::getline(file, line));i++)
+    {
+        std::vector<Token> tokens = Tokenize(line);
+
+        if(tokens.empty())
+            continue;
+
+        if(tokens[0].type == TokenType::INSTRUCTION && tokens.size() == 2)
+        {
+            if(!std::isdigit(tokens[1].value[0]))
+            {
+                if(!(variables.contains(tokens[1].value) or labels.contains(tokens[1].value)))
+                {
+                    result.push_back("-------------------------------------------\nUnknown name: '" + tokens[1].value + "'. \nLine: " + std::to_string(i + 1) + "\n-------------------------------------------");
+                }
+            }
+        }
+    }
+    
+
+    return result;
+}
 
 std::vector<uint8_t> AssembleFromFile(std::string filename)
 {
     std::vector<std::string> invalidTokens = CheckFileForSyntaxErrors(filename);
+    
+    std::vector<std::string> conflicts = CheckFileForNameConflicts(filename);
 
+    if(!conflicts.empty())
+    {
+        invalidTokens.insert(invalidTokens.end(), conflicts.begin(), conflicts.end());
+    }
     if (!invalidTokens.empty())
         throw invalidTokens;
 
