@@ -294,10 +294,7 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
             {
                 std::string value = tokens[1].value;
 
-                if(isalnum(value[0]))
-                {
-                    data[i] |= StrToUint16(value);
-                }
+                
                 if (variables.contains(value))
                 {
                     data[i] |= variables[value].address;
@@ -305,6 +302,10 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
                 else if (labels.contains(value))
                 {
                     data[i] |= labels[value];
+                }
+                else if(isalnum(value[0]))
+                {
+                    data[i] |= StrToUint16(value);
                 }
             }
             i++;
