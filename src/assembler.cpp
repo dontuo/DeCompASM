@@ -1,4 +1,6 @@
 #include "assembler.hpp"
+#include <bitset>
+#include <cctype>
 // instructions of DeComp
 std::unordered_map<std::string, uint16_t> opcodeMap = {
     {"LOAD", 0b0000000000000000}, 
@@ -291,6 +293,11 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
             if (tokens.size() == 2)
             {
                 std::string value = tokens[1].value;
+
+                if(isalnum(value[0]))
+                {
+                    data[i] |= StrToUint16(value);
+                }
                 if (variables.contains(value))
                 {
                     data[i] |= variables[value].address;
@@ -311,6 +318,13 @@ std::vector<uint8_t> AssembleFromFile(std::string filename)
         }
     }
 
+    std::cout << "final machine code: \n";
+    for(int i = 0; i < instructionCount + variables.size(); i++)
+    {
+        std::bitset<16> instr(data[i]);
+        std::cout << i << "  " << instr << '\n';
+    }
+    
     return Cnv16to8ROL(data);
 }
 
